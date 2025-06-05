@@ -67,9 +67,6 @@ public class BulletControl extends AbstractControl {
     private boolean shouldDestroy() {
         // Destruir por tiempo de vida
         if (age >= lifetime) {
-            System.out.println("BulletControl - Bala marcada para destrucción por TIEMPO: age=" + 
-                             String.format("%.2f", age) + "s >= lifetime=" + 
-                             String.format("%.2f", lifetime) + "s");
             return true;
         }
         
@@ -77,13 +74,7 @@ public class BulletControl extends AbstractControl {
         Vector3f pos = spatial.getLocalTranslation();
         float distance = pos.length();
         
-        if (distance > maxDistance) {
-            System.out.println("BulletControl - Bala marcada para destrucción por DISTANCIA: " + 
-                             String.format("%.2f", distance) + " > " + maxDistance);
-            return true;
-        }
-        
-        return false;
+        return distance > maxDistance;
     }
     
     /**
