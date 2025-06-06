@@ -303,13 +303,14 @@ public class EnemyManager {
      * Actualiza los enemigos activos y limpia los que deben ser destruidos
      */
     private void updateActiveEnemies() {
-        List<Enemy> toRemove = new ArrayList<>();
+        // Usar iterador para evitar ConcurrentModificationException
+        java.util.Iterator<Enemy> iterator = activeEnemies.iterator();
         
-        for (Enemy enemy : activeEnemies) {
+        while (iterator.hasNext()) {
+            Enemy enemy = iterator.next();
+            
             // Verificar si el enemigo debe ser destruido
             if (enemy.shouldDestroy()) {
-                toRemove.add(enemy);
-                
                 // Verificar por qué se destruye
                 if (enemy.hasReachedCore()) {
                     // El enemigo alcanzó el núcleo
@@ -325,11 +326,11 @@ public class EnemyManager {
                 
                 // Remover de la escena
                 enemy.removeFromParent();
+                
+                // Remover de la lista usando el iterador
+                iterator.remove();
             }
         }
-        
-        // Remover enemigos de la lista activa
-        activeEnemies.removeAll(toRemove);
     }
     
     /**

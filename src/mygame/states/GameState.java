@@ -14,7 +14,11 @@ import com.jme3.input.controls.*;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.renderer.Camera;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
+import com.jme3.scene.control.BillboardControl;
 import mygame.config.GameConfig;
+import mygame.states.GameOverState;
 import mygame.controls.CoreControl;
 import mygame.controls.PlayerControl;
 import mygame.entities.Core;
@@ -74,6 +78,9 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     /** Aplicación principal de jME3 que proporciona acceso a recursos y sistemas */
     private SimpleApplication app;
     
+    /** Gestor de estados de la aplicación */
+    private AppStateManager stateManager;
+    
     /** Nodo raíz de la escena 3D donde se adjuntan todos los objetos */
     private Node rootNode;
     
@@ -131,6 +138,17 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
      */
     private Node bulletsNode;
     
+    /** 
+     * Nodo para la interfaz de usuario.
+     * Contiene todos los elementos del HUD.
+     */
+    private Node guiNode;
+    
+    /** 
+     * Texto de la puntuación mostrado en pantalla.
+     */
+    private BitmapText scoreText;
+    
     // === Estado del juego ===
     /** 
      * Indica si el juego ha terminado (núcleo destruido).
@@ -143,6 +161,12 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
      * Usado para estadísticas, oleadas y eventos temporales.
      */
     private float gameTime = 0f;
+    
+    /** 
+     * Puntuación del jugador.
+     * Se incrementa en 10 puntos por cada enemigo eliminado.
+     */
+    private int score = 0;
     
     // === Variables de control de entrada ===
     /** Estados de las teclas de movimiento WASD */
@@ -178,10 +202,12 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
         
+        this.stateManager = stateManager;
         this.app = (SimpleApplication) app;
         this.rootNode = this.app.getRootNode();
         this.inputManager = this.app.getInputManager();
         this.cam = this.app.getCamera();
+        this.guiNode = this.app.getGuiNode();
         
         // Crear nodo principal del juego
         gameNode = new Node("GameNode");
@@ -202,6 +228,9 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
         
         // Configurar los controles
         setupInput();
+        
+        // Configurar UI
+        setupUI();
     }
     
     /**
@@ -408,6 +437,31 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     }
     
     /**
+     * Configura la interfaz de usuario del juego.
+     * 
+     * <p>Inicializa todos los elementos del HUD incluyendo:</p>
+     * <ul>
+     *   <li><strong>Puntuación:</strong> Contador de puntos del jugador</li>
+     * </ul>
+     */
+    private void setupUI() {
+        // Obtener la fuente por defecto
+        BitmapFont font = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
+        
+        // Crear texto de puntuación
+        scoreText = new BitmapText(font, false);
+        scoreText.setSize(font.getCharSet().getRenderedSize() * 2);
+        scoreText.setColor(com.jme3.math.ColorRGBA.White);
+        scoreText.setText("Score: 0");
+        scoreText.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);
+        
+        // Añadir al nodo GUI
+        guiNode.attachChild(scoreText);
+        
+        System.out.println("UI configurada");
+    }
+    
+    /**
      * Listener para el movimiento del jugador
      */
     private ActionListener moveListener = new ActionListener() {
@@ -541,7 +595,7 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     
     @Override
     public void update(float tpf) {
-        if (!gameOver) {
+        if (!gameOver && isEnabled()) {
             gameTime += tpf;
             
             // Actualizar el pool de balas
@@ -629,6 +683,8 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     public void resetGame() {
         gameOver = false;
         gameTime = 0f;
+        score = 0;
+        updateScoreDisplay();
         
         // Reiniciar el núcleo
         coreControl.reset();
@@ -649,9 +705,11 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
         System.out.println("¡GAME OVER! El núcleo ha sido destruido.");
         gameOver = true;
         
-        // TODO: Mostrar pantalla de Game Over (Fase 6)
-        // TODO: Detener spawn de enemigos
-        // TODO: Mostrar estadísticas finales
+        // Detener spawn de enemigos
+        enemyManager.cleanup();
+        
+        // Crear y mostrar pantalla de Game Over
+        showGameOverScreen();
     }
     
     @Override
@@ -691,7 +749,9 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     public void onEnemyDied(Enemy enemy) {
         System.out.println("Enemigo eliminado por disparo del jugador");
         
-        // TODO: Añadir puntuación
+        // Añadir puntuación
+        addScore(10);
+        
         // TODO: Efectos visuales/sonoros
         // TODO: Posibles drops de power-ups
     }
@@ -731,6 +791,11 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
         if (enemyManager != null) {
             enemyManager.cleanup();
         }
+        
+        // Limpiar UI
+        if (scoreText != null) {
+            scoreText.removeFromParent();
+        }
     }
     
     // Getters para acceso desde otros sistemas
@@ -753,5 +818,53 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     
     public EnemyManager getEnemyManager() {
         return enemyManager;
+    }
+    
+    /**
+     * Obtiene la puntuación actual del jugador
+     * 
+     * @return Puntuación actual
+     */
+    public int getScore() {
+        return score;
+    }
+    
+    /**
+     * Añade puntos a la puntuación del jugador
+     * 
+     * @param points Puntos a añadir
+     */
+    private void addScore(int points) {
+        score += points;
+        updateScoreDisplay();
+        System.out.println("Puntuación: +" + points + " = " + score);
+    }
+    
+    /**
+     * Actualiza la visualización de la puntuación en pantalla
+     */
+    private void updateScoreDisplay() {
+        if (scoreText != null) {
+            scoreText.setText("Score: " + score);
+        }
+    }
+    
+    /**
+     * Muestra la pantalla de Game Over con las estadísticas finales
+     */
+    private void showGameOverScreen() {
+        // Crear estado de Game Over con estadísticas finales
+        GameOverState gameOverState = new GameOverState(
+            config,
+            score,
+            enemyManager.getCurrentWave(),
+            gameTime
+        );
+        
+        // Remover este estado y agregar el de Game Over
+        stateManager.detach(this);
+        stateManager.attach(gameOverState);
+        
+        System.out.println("Transición a pantalla de Game Over");
     }
 }

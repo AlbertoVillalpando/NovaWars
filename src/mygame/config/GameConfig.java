@@ -133,7 +133,7 @@ public class GameConfig {
     // Configuración de oleadas
     public int getBaseWaveSize() { return 3; } // Enemigos en la primera oleada
     public float getWaveScaling() { return 1.5f; } // Factor de escalamiento por oleada
-    public float getWaveInterval() { return 15f; } // Segundos entre oleadas
+    public float getWaveInterval() { return 5f; } // Segundos entre oleadas
     public float getEnemyCoreDamage() { return 0.1f; } // 10% de daño al núcleo
 
     /**
