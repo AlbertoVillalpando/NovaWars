@@ -2,10 +2,66 @@ package mygame.config;
 
 
 /**
- * Clase de configuración que mapea el archivo settings.json
- * Contiene todos los parámetros ajustables del juego
+ * Configuración centralizada del juego NovaWars - Sistema de parámetros ajustables.
+ * 
+ * <p>GameConfig actúa como un almacén central de todos los parámetros configurables
+ * del juego, proporcionando valores por defecto robustos y métodos de conveniencia
+ * para acceso fácil desde cualquier parte del sistema.</p>
+ * 
+ * <h3>Categorías de configuración:</h3>
+ * <ul>
+ *   <li><strong>Resolution:</strong> Configuración de pantalla y renderizado</li>
+ *   <li><strong>Core:</strong> Parámetros del núcleo central (vida, tamaño)</li>
+ *   <li><strong>Player:</strong> Configuración del jugador (velocidad, tamaño)</li>
+ *   <li><strong>Bullet:</strong> Propiedades de proyectiles (velocidad, vida, tamaño)</li>
+ *   <li><strong>Enemy:</strong> Configuración base de enemigos</li>
+ * </ul>
+ * 
+ * <h3>Sistema de configuración especializada:</h3>
+ * <ul>
+ *   <li><strong>CircularEnemy:</strong> Parámetros de movimiento orbital</li>
+ *   <li><strong>ZigZagEnemy:</strong> Configuración de patrón serpenteante</li>
+ *   <li><strong>Wave system:</strong> Escalado de oleadas y dificultad</li>
+ *   <li><strong>Combat balance:</strong> Daño, cooldowns y límites</li>
+ * </ul>
+ * 
+ * <h3>Patrón de diseño aplicado:</h3>
+ * <ul>
+ *   <li><strong>Fallback seguro:</strong> Valores por defecto para propiedades null</li>
+ *   <li><strong>Getters de conveniencia:</strong> Acceso directo sin verificación manual</li>
+ *   <li><strong>Configuración jerárquica:</strong> Clases anidadas para organización</li>
+ *   <li><strong>Extensibilidad:</strong> Fácil adición de nuevos parámetros</li>
+ * </ul>
+ * 
+ * <h3>Cargas de configuración:</h3>
+ * <ul>
+ *   <li><strong>Archivo properties:</strong> game.properties en classpath</li>
+ *   <li><strong>Valores por defecto:</strong> Configuración hardcoded de respaldo</li>
+ *   <li><strong>Carga dinámica:</strong> ConfigLoader maneja la deserialización</li>
+ *   <li><strong>Error handling:</strong> Graceful fallback ante errores de carga</li>
+ * </ul>
+ * 
+ * <h3>Balance de gameplay:</h3>
+ * <ul>
+ *   <li><strong>Escalado progresivo:</strong> Oleadas más difíciles con el tiempo</li>
+ *   <li><strong>Especialización de enemigos:</strong> Cada tipo con características únicas</li>
+ *   <li><strong>Pooling optimization:</strong> Límites para rendimiento óptimo</li>
+ *   <li><strong>Combat pacing:</strong> Cooldowns y intervalos balanceados</li>
+ * </ul>
+ * 
+ * <h3>Integración con sistemas:</h3>
+ * <ul>
+ *   <li><strong>ConfigLoader:</strong> Sistema de carga desde archivo</li>
+ *   <li><strong>Main:</strong> Configuración inicial de aplicación</li>
+ *   <li><strong>GameState:</strong> Parámetros de entidades y sistemas</li>
+ *   <li><strong>EnemyManager:</strong> Configuración de oleadas y spawning</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see ConfigLoader
+ * @see Main#loadGameConfig()
+ * @since 2024
  */
 public class GameConfig {
     

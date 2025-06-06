@@ -13,11 +13,55 @@ import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
 
 /**
- * Representa el núcleo central que el jugador debe defender.
- * El núcleo tiene un sistema de salud y cambia de apariencia visual
- * según su estado de daño.
+ * Núcleo central defendible - El objetivo principal de NovaWars.
  * 
- * @author tu_nombre
+ * <p>El Core representa la estructura crítica que el jugador debe proteger
+ * de las oleadas de enemigos. Es una entidad compleja con sistema de vida,
+ * efectos visuales dinámicos e invulnerabilidad temporal tras recibir daño.</p>
+ * 
+ * <h3>Sistema de vida y estados:</h3>
+ * <ul>
+ *   <li><strong>Vida máxima:</strong> Configurable desde GameConfig</li>
+ *   <li><strong>Vida actual:</strong> Se reduce con ataques enemigos</li>
+ *   <li><strong>Estados visuales:</strong> Colores que indican nivel de salud</li>
+ *   <li><strong>Invulnerabilidad:</strong> Protección temporal tras daño</li>
+ * </ul>
+ * 
+ * <h3>Componentes visuales:</h3>
+ * <ul>
+ *   <li><strong>Núcleo principal:</strong> Esfera central con material emisivo</li>
+ *   <li><strong>Anillo decorativo:</strong> Estructura orbital horizontal</li>
+ *   <li><strong>Escudo temporal:</strong> Esfera translúcida durante invulnerabilidad</li>
+ *   <li><strong>Efectos dinámicos:</strong> Rotación, pulsación, parpadeo</li>
+ * </ul>
+ * 
+ * <h3>Estados de salud y colores:</h3>
+ * <ul>
+ *   <li><strong>Salud alta (>66%):</strong> Cyan brillante - Estado óptimo</li>
+ *   <li><strong>Salud media (33-66%):</strong> Amarillo - Estado de advertencia</li>
+ *   <li><strong>Salud baja (<33%):</strong> Rojo + pulsación - Estado crítico</li>
+ * </ul>
+ * 
+ * <h3>Mecánicas de protección:</h3>
+ * <ul>
+ *   <li><strong>Invulnerabilidad temporal:</strong> 0.5s tras recibir daño</li>
+ *   <li><strong>Escudo visual:</strong> Indica período de protección</li>
+ *   <li><strong>Efectos de impacto:</strong> Feedback visual al recibir daño</li>
+ *   <li><strong>Sistema de curación:</strong> Recuperación de vida</li>
+ * </ul>
+ * 
+ * <h3>Integración con gameplay:</h3>
+ * <ul>
+ *   <li><strong>CoreControl:</strong> Maneja eventos y notificaciones</li>
+ *   <li><strong>EnemyManager:</strong> Objetivo de todos los enemigos</li>
+ *   <li><strong>GameState:</strong> Condición de game over al ser destruido</li>
+ * </ul>
+ * 
+ * @author Alberto Villalpando
+ * @version 1.0
+ * @see CoreControl
+ * @see GameState
+ * @since 2024
  */
 public class Core extends Node {
     

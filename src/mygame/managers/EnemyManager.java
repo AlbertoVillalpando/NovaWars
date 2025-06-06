@@ -14,10 +14,73 @@ import mygame.entities.ZigZagEnemy;
 import mygame.entities.BasicEnemy;
 
 /**
- * Manager que controla el spawn de enemigos y el sistema de oleadas.
- * Gestiona la progresión de dificultad y la aparición de diferentes tipos de enemigos.
+ * Sistema de gestión de enemigos y oleadas - Motor de dificultad progresiva.
+ * 
+ * <p>EnemyManager es el cerebro del sistema de enemigos que controla el spawning,
+ * la progresión de oleadas, la escalada de dificultad y la coordinación de
+ * diferentes tipos de enemigos para crear una experiencia de juego balanceada.</p>
+ * 
+ * <h3>Sistema de oleadas:</h3>
+ * <ul>
+ *   <li><strong>Progresión automática:</strong> Oleadas se generan continuamente</li>
+ *   <li><strong>Dificultad escalante:</strong> Más enemigos y tipos variados por oleada</li>
+ *   <li><strong>Timing controlado:</strong> Intervalos entre spawns y oleadas</li>
+ *   <li><strong>Notificaciones:</strong> Eventos para UI y feedback al jugador</li>
+ * </ul>
+ * 
+ * <h3>Tipos de enemigos gestionados:</h3>
+ * <ul>
+ *   <li><strong>BasicEnemy:</strong> Movimiento directo, oleadas iniciales</li>
+ *   <li><strong>CircularEnemy:</strong> Patrón orbital, dificultad media</li>
+ *   <li><strong>ZigZagEnemy:</strong> Movimiento evasivo, dificultad alta</li>
+ *   <li><strong>Mix dinámico:</strong> Combinaciones variables según oleada</li>
+ * </ul>
+ * 
+ * <h3>Algoritmo de spawning:</h3>
+ * <ul>
+ *   <li><strong>Posicionamiento circular:</strong> Aparición en perímetro del área</li>
+ *   <li><strong>Distribución aleatoria:</strong> Ángulos variables para impredecibilidad</li>
+ *   <li><strong>Distancia segura:</strong> Spawning fuera del alcance inmediato</li>
+ *   <li><strong>Targeting automático:</strong> Todos los enemigos conocen posición del núcleo</li>
+ * </ul>
+ * 
+ * <h3>Escalada de dificultad:</h3>
+ * <ul>
+ *   <li><strong>Cantidad:</strong> Más enemigos por oleada con el tiempo</li>
+ *   <li><strong>Variedad:</strong> Introducción gradual de enemigos complejos</li>
+ *   <li><strong>Velocidad:</strong> Intervalos de spawn más cortos</li>
+ *   <li><strong>Composición:</strong> Balance dinámico de tipos de enemigos</li>
+ * </ul>
+ * 
+ * <h3>Gestión de ciclo de vida:</h3>
+ * <ul>
+ *   <li><strong>Lista activa:</strong> Tracking de todos los enemigos en pantalla</li>
+ *   <li><strong>Cleanup automático:</strong> Eliminación de enemigos muertos</li>
+ *   <li><strong>Eventos de llegada:</strong> Manejo cuando enemigos alcanzan núcleo</li>
+ *   <li><strong>Reset completo:</strong> Limpieza para reinicio de juego</li>
+ * </ul>
+ * 
+ * <h3>Patrón Observer implementado:</h3>
+ * <ul>
+ *   <li><strong>EnemyManagerListener:</strong> Interface para eventos</li>
+ *   <li><strong>onEnemyReachedCore():</strong> Notificación de daño al núcleo</li>
+ *   <li><strong>onEnemyDied():</strong> Notificación de eliminación por jugador</li>
+ *   <li><strong>onNewWave():</strong> Notificación de inicio de oleada</li>
+ * </ul>
+ * 
+ * <h3>Integración con sistemas:</h3>
+ * <ul>
+ *   <li><strong>GameState:</strong> Listener principal para eventos</li>
+ *   <li><strong>GameConfig:</strong> Parámetros de enemigos y dificultad</li>
+ *   <li><strong>CoreControl:</strong> Aplicación de daño cuando enemigos llegan</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see Enemy
+ * @see EnemyManagerListener
+ * @see GameState
+ * @since 2024
  */
 public class EnemyManager {
     

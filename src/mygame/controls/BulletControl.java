@@ -8,10 +8,56 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 
 /**
- * Control para manejar el comportamiento de los proyectiles
- * Los proyectiles viajan en línea recta y se destruyen después de cierto tiempo
+ * Control de comportamiento para proyectiles - Movimiento lineal y auto-destrucción.
+ * 
+ * <p>BulletControl maneja toda la lógica de vida de un proyectil desde su creación
+ * hasta su destrucción. Implementa movimiento lineal constante con múltiples
+ * condiciones de terminación para optimizar rendimiento.</p>
+ * 
+ * <h3>Comportamiento de movimiento:</h3>
+ * <ul>
+ *   <li><strong>Trayectoria lineal:</strong> Movimiento en línea recta hacia objetivo</li>
+ *   <li><strong>Velocidad constante:</strong> Sin aceleración ni deceleración</li>
+ *   <li><strong>Dirección fija:</strong> Sin cambios de rumbo tras disparo</li>
+ *   <li><strong>Movimiento basado en tiempo:</strong> Consistencia independiente de FPS</li>
+ * </ul>
+ * 
+ * <h3>Condiciones de auto-destrucción:</h3>
+ * <ul>
+ *   <li><strong>Tiempo de vida:</strong> Destrucción automática tras lifetime segundos</li>
+ *   <li><strong>Límite de distancia:</strong> Eliminación al salir del área válida</li>
+ *   <li><strong>Colisión externa:</strong> Marcado por GameState al impactar enemigos</li>
+ *   <li><strong>Optimización de memoria:</strong> Retorno automático al pool</li>
+ * </ul>
+ * 
+ * <h3>Sistema de marcado para destrucción:</h3>
+ * <ul>
+ *   <li><strong>UserData "destroy":</strong> Flag booleano para eliminación</li>
+ *   <li><strong>Verificación por sistemas:</strong> GameState y BulletPool monitoran</li>
+ *   <li><strong>Limpieza automática:</strong> BulletPool maneja reutilización</li>
+ * </ul>
+ * 
+ * <h3>Métricas de rendimiento:</h3>
+ * <ul>
+ *   <li><strong>Age tracking:</strong> Tiempo transcurrido desde creación</li>
+ *   <li><strong>Life percentage:</strong> Porcentaje de vida útil consumido</li>
+ *   <li><strong>Distance checking:</strong> Validación eficiente de límites</li>
+ *   <li><strong>Pooling optimized:</strong> Diseñado para reutilización de objetos</li>
+ * </ul>
+ * 
+ * <h3>Integración con sistemas:</h3>
+ * <ul>
+ *   <li><strong>BulletPool:</strong> Gestión de ciclo de vida y reutilización</li>
+ *   <li><strong>GameState:</strong> Detección de colisiones y marcado para destrucción</li>
+ *   <li><strong>Player:</strong> Origen de dirección y parámetros iniciales</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see Bullet
+ * @see BulletPool
+ * @see GameState#detectBulletEnemyCollisions()
+ * @since 2024
  */
 public class BulletControl extends AbstractControl {
     

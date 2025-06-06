@@ -9,12 +9,57 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 
 /**
- * Control para manejar el movimiento y rotación del jugador
- * Implementa el sistema twin-stick donde:
- * - WASD controla el movimiento
- * - Mouse controla la dirección de apuntado
+ * Control de movimiento y orientación para el jugador - Implementación twin-stick shooter.
+ * 
+ * <p>PlayerControl maneja toda la lógica de movimiento, rotación y restricciones
+ * espaciales del jugador. Implementa el patrón clásico twin-stick donde el
+ * movimiento y el apuntado son independientes.</p>
+ * 
+ * <h3>Sistema twin-stick implementado:</h3>
+ * <ul>
+ *   <li><strong>Stick izquierdo (WASD):</strong> Movimiento omnidireccional</li>
+ *   <li><strong>Stick derecho (Mouse):</strong> Apuntado independiente</li>
+ *   <li><strong>Movimiento normalizado:</strong> Velocidad consistente en todas direcciones</li>
+ *   <li><strong>Rotación suave:</strong> Orientación hacia dirección de apuntado</li>
+ * </ul>
+ * 
+ * <h3>Restricciones espaciales:</h3>
+ * <ul>
+ *   <li><strong>Límites configurables:</strong> Área de juego definida por maxX/maxZ</li>
+ *   <li><strong>Clampeo automático:</strong> Previene salida del área de juego</li>
+ *   <li><strong>Plano Y fijo:</strong> Movimiento restringido al plano horizontal</li>
+ *   <li><strong>Boundaries dinámicos:</strong> Ajustables según tamaño de nivel</li>
+ * </ul>
+ * 
+ * <h3>Algoritmos de movimiento:</h3>
+ * <ul>
+ *   <li><strong>Velocidad basada en tiempo:</strong> Consistencia independiente de FPS</li>
+ *   <li><strong>Normalización vectorial:</strong> Movimiento diagonal uniforme</li>
+ *   <li><strong>Rotación por atan2:</strong> Cálculo preciso de orientación</li>
+ *   <li><strong>Quaternion rotation:</strong> Rotación suave sin gimbal lock</li>
+ * </ul>
+ * 
+ * <h3>Estados de entrada:</h3>
+ * <ul>
+ *   <li><strong>moveDirection:</strong> Vector de movimiento desde input WASD</li>
+ *   <li><strong>aimDirection:</strong> Vector hacia posición del cursor</li>
+ *   <li><strong>velocity:</strong> Vector de velocidad calculado para el frame</li>
+ * </ul>
+ * 
+ * <h3>Integración con GameState:</h3>
+ * <ul>
+ *   <li><strong>setMoveDirection():</strong> Recibe input de movimiento</li>
+ *   <li><strong>setAimDirection():</strong> Recibe dirección de apuntado</li>
+ *   <li><strong>getAimDirection():</strong> Proporciona dirección para disparos</li>
+ *   <li><strong>setPlayAreaBounds():</strong> Configura límites del área de juego</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see Player
+ * @see GameState#updateMoveDirection()
+ * @see GameState#mouseListener
+ * @since 2024
  */
 public class PlayerControl extends AbstractControl {
     

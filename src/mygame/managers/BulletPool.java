@@ -12,10 +12,64 @@ import mygame.entities.Bullet;
 import com.jme3.app.SimpleApplication;
 
 /**
- * Pool de objetos para manejar eficientemente las balas
- * Evita crear y destruir objetos constantemente, mejorando el rendimiento
+ * Sistema de pooling de objetos para proyectiles - Optimización de rendimiento crítica.
+ * 
+ * <p>BulletPool implementa el patrón Object Pool para gestionar eficientemente
+ * los proyectiles del jugador. Evita la creación/destrucción constante de objetos
+ * durante el combate intenso, manteniendo un framerate estable.</p>
+ * 
+ * <h3>Arquitectura del pool:</h3>
+ * <ul>
+ *   <li><strong>Pool disponible:</strong> Queue de balas reutilizables</li>
+ *   <li><strong>Lista activa:</strong> Balas actualmente en movimiento</li>
+ *   <li><strong>Tamaño dinámico:</strong> Expansión automática cuando se agota</li>
+ *   <li><strong>Configuración uniforme:</strong> Parámetros consistentes para todas las balas</li>
+ * </ul>
+ * 
+ * <h3>Ciclo de vida de las balas:</h3>
+ * <ul>
+ *   <li><strong>Pre-inicialización:</strong> Creación inicial de pool completo</li>
+ *   <li><strong>Obtención:</strong> getBullet() configura y activa una bala</li>
+ *   <li><strong>Actividad:</strong> Bala se mueve y puede colisionar</li>
+ *   <li><strong>Marcado destrucción:</strong> BulletControl o GameState marcan para eliminar</li>
+ *   <li><strong>Retorno:</strong> returnBullet() devuelve al pool para reutilización</li>
+ * </ul>
+ * 
+ * <h3>Optimizaciones implementadas:</h3>
+ * <ul>
+ *   <li><strong>Lazy expansion:</strong> Creación bajo demanda si pool se agota</li>
+ *   <li><strong>Reset eficiente:</strong> Reutilización de objetos sin new/delete</li>
+ *   <li><strong>Batch processing:</strong> update() procesa todas las balas en lote</li>
+ *   <li><strong>Memory cleanup:</strong> Gestión de referencias para GC</li>
+ * </ul>
+ * 
+ * <h3>Monitoreo y debug:</h3>
+ * <ul>
+ *   <li><strong>Contadores en tiempo real:</strong> Disponibles vs activas</li>
+ *   <li><strong>Debug logging:</strong> Información de reciclaje y estado</li>
+ *   <li><strong>Métricas de rendimiento:</strong> Tracking de expansiones del pool</li>
+ * </ul>
+ * 
+ * <h3>Integración con sistemas:</h3>
+ * <ul>
+ *   <li><strong>GameState:</strong> Obtención de balas para disparos</li>
+ *   <li><strong>BulletControl:</strong> Auto-marcado para destrucción</li>
+ *   <li><strong>GameConfig:</strong> Parámetros uniformes para todas las balas</li>
+ * </ul>
+ * 
+ * <h3>Consideraciones de rendimiento:</h3>
+ * <ul>
+ *   <li><strong>Pool size inicial:</strong> Balance entre memoria y creaciones dinámicas</li>
+ *   <li><strong>Cleanup automático:</strong> Retorno automático de balas expiradas</li>
+ *   <li><strong>Zero allocation shooting:</strong> Disparos sin impacto en GC</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see Bullet
+ * @see BulletControl
+ * @see GameState#shoot()
+ * @since 2024
  */
 public class BulletPool {
     

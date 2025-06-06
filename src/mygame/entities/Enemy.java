@@ -10,10 +10,64 @@ import com.jme3.scene.shape.Sphere;
 import mygame.controls.EnemyControl;
 
 /**
- * Clase base abstracta para todos los enemigos del juego.
- * Define la estructura común y métodos que todos los enemigos deben implementar.
+ * Clase base abstracta para todos los enemigos de NovaWars.
+ * 
+ * <p>Define la arquitectura común y comportamiento base que todos los tipos de
+ * enemigos deben implementar. Proporciona un framework robusto para crear
+ * diferentes variantes de enemigos con patrones de movimiento únicos.</p>
+ * 
+ * <h3>Arquitectura de enemigos:</h3>
+ * <ul>
+ *   <li><strong>Estructura base:</strong> Propiedades comunes de vida, velocidad, tamaño</li>
+ *   <li><strong>Sistema visual:</strong> Geometría configurable con materiales neón</li>
+ *   <li><strong>Control de IA:</strong> EnemyControl para patrones de movimiento</li>
+ *   <li><strong>Estados de vida:</strong> Gestión de muerte y llegada al núcleo</li>
+ * </ul>
+ * 
+ * <h3>Propiedades configurables:</h3>
+ * <ul>
+ *   <li><strong>Health:</strong> Vida actual y máxima del enemigo</li>
+ *   <li><strong>Speed:</strong> Velocidad de movimiento en unidades/segundo</li>
+ *   <li><strong>Size:</strong> Radio para colisiones y representación visual</li>
+ *   <li><strong>CoreDamage:</strong> Daño infligido al núcleo al alcanzarlo</li>
+ * </ul>
+ * 
+ * <h3>Sistema de vida y estados:</h3>
+ * <ul>
+ *   <li><strong>Daño progresivo:</strong> Reduce brillo visual con la salud</li>
+ *   <li><strong>Muerte:</strong> Marcado para eliminación al llegar a 0 vida</li>
+ *   <li><strong>Llegada al núcleo:</strong> Aplica daño y se auto-destruye</li>
+ *   <li><strong>Reutilización:</strong> Reset completo para pooling de objetos</li>
+ * </ul>
+ * 
+ * <h3>Patrones de implementación:</h3>
+ * <ul>
+ *   <li><strong>Template Method:</strong> createEnemyControl() personalizable</li>
+ *   <li><strong>Factory Pattern:</strong> getEnemyColor() define apariencia</li>
+ *   <li><strong>Observer Pattern:</strong> Notificaciones de eventos de vida</li>
+ *   <li><strong>Object Pool:</strong> Sistema de reset para reutilización</li>
+ * </ul>
+ * 
+ * <h3>Subclases implementadas:</h3>
+ * <ul>
+ *   <li><strong>BasicEnemy:</strong> Movimiento directo hacia el núcleo</li>
+ *   <li><strong>CircularEnemy:</strong> Patrón circular alrededor del núcleo</li>
+ *   <li><strong>ZigZagEnemy:</strong> Movimiento serpenteante hacia el objetivo</li>
+ * </ul>
+ * 
+ * <h3>Integración con sistemas:</h3>
+ * <ul>
+ *   <li><strong>EnemyManager:</strong> Spawning, gestión y pooling</li>
+ *   <li><strong>GameState:</strong> Detección de colisiones con balas</li>
+ *   <li><strong>CoreControl:</strong> Aplicación de daño al núcleo</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see EnemyControl
+ * @see EnemyManager
+ * @see BasicEnemy
+ * @since 2024
  */
 public abstract class Enemy extends Node {
     

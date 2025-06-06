@@ -11,10 +11,58 @@ import com.jme3.scene.shape.Sphere;
 import mygame.controls.BulletControl;
 
 /**
- * Entidad que representa un proyectil en el juego
- * Estilo visual neón para mantener coherencia con el arte del juego
+ * Proyectil disparado por el jugador - Entidad de combate optimizada para pooling.
+ * 
+ * <p>Bullet representa los proyectiles que el jugador dispara hacia los enemigos.
+ * Diseñada específicamente para ser utilizada con BulletPool, implementa
+ * reutilización eficiente de objetos y limpieza automática de recursos.</p>
+ * 
+ * <h3>Características visuales:</h3>
+ * <ul>
+ *   <li><strong>Forma:</strong> Esfera pequeña y brillante</li>
+ *   <li><strong>Color:</strong> Amarillo neón con efecto de brillo</li>
+ *   <li><strong>Tamaño:</strong> Configurable desde GameConfig</li>
+ *   <li><strong>Material:</strong> Shader unshaded para máximo brillo</li>
+ * </ul>
+ * 
+ * <h3>Comportamiento de movimiento:</h3>
+ * <ul>
+ *   <li><strong>Dirección lineal:</strong> Se mueve en línea recta hacia el objetivo</li>
+ *   <li><strong>Velocidad constante:</strong> Configurada desde GameConfig</li>
+ *   <li><strong>Tiempo de vida:</strong> Auto-destrucción tras duración configurada</li>
+ *   <li><strong>Colisiones:</strong> Se destruye al impactar enemigos</li>
+ * </ul>
+ * 
+ * <h3>Sistema de pooling:</h3>
+ * <ul>
+ *   <li><strong>Reutilización:</strong> Las instancias se reciclan en lugar de crear nuevas</li>
+ *   <li><strong>Reset eficiente:</strong> Restablece estado sin recrear objetos</li>
+ *   <li><strong>Limpieza automática:</strong> Gestión de memoria optimizada</li>
+ *   <li><strong>Control dinámico:</strong> BulletControl se recrea por disparo</li>
+ * </ul>
+ * 
+ * <h3>Integración con sistemas:</h3>
+ * <ul>
+ *   <li><strong>BulletPool:</strong> Origen y gestión del ciclo de vida</li>
+ *   <li><strong>BulletControl:</strong> Lógica de movimiento y auto-destrucción</li>
+ *   <li><strong>GameState:</strong> Detección de colisiones con enemigos</li>
+ *   <li><strong>Player:</strong> Punto de origen para nuevos disparos</li>
+ * </ul>
+ * 
+ * <h3>Estados de vida:</h3>
+ * <ul>
+ *   <li><strong>Activa:</strong> Moviéndose hacia objetivo</li>
+ *   <li><strong>Colisionó:</strong> Marcada para destrucción</li>
+ *   <li><strong>Expiró:</strong> Tiempo de vida agotado</li>
+ *   <li><strong>Pooled:</strong> Inactiva, esperando reutilización</li>
+ * </ul>
  * 
  * @author Alberto Villalpando
+ * @version 1.0
+ * @see BulletPool
+ * @see BulletControl
+ * @see GameState#detectBulletEnemyCollisions()
+ * @since 2024
  */
 public class Bullet {
     

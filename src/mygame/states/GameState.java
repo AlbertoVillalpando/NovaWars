@@ -26,38 +26,132 @@ import mygame.managers.EnemyManager;
 import java.util.List;
 
 /**
- * Estado principal del juego que maneja todas las entidades y la lógica del juego.
- * Integra el jugador, el núcleo central, enemigos y sistemas de juego.
+ * Estado principal del juego NovaWars - Coordinador central de toda la lógica de gameplay.
  * 
- * @author tu_nombre
+ * <p>GameState es el núcleo del juego que coordina todas las entidades, sistemas y mecánicas.
+ * Implementa el patrón Observer para recibir eventos del núcleo y enemigos, y gestiona
+ * el flujo completo del juego desde la inicialización hasta la limpieza.</p>
+ * 
+ * <h3>Responsabilidades principales:</h3>
+ * <ul>
+ *   <li><strong>Gestión de entidades:</strong> Player, Core, Enemy, Bullet</li>
+ *   <li><strong>Sistema de input:</strong> Twin-stick controls (WASD + mouse)</li>
+ *   <li><strong>Detección de colisiones:</strong> Balas vs enemigos, enemigos vs núcleo</li>
+ *   <li><strong>Coordinación de sistemas:</strong> BulletPool, EnemyManager</li>
+ *   <li><strong>Estado del juego:</strong> Game over, tiempo, oleadas</li>
+ *   <li><strong>Configuración de cámara:</strong> Vista top-down optimizada</li>
+ * </ul>
+ * 
+ * <h3>Arquitectura de entrada:</h3>
+ * <ul>
+ *   <li><strong>WASD:</strong> Movimiento direccional del jugador</li>
+ *   <li><strong>Mouse movement:</strong> Apuntado hacia cursor</li>
+ *   <li><strong>Left click:</strong> Disparo de proyectiles</li>
+ * </ul>
+ * 
+ * <h3>Sistemas integrados:</h3>
+ * <ul>
+ *   <li><strong>BulletPool:</strong> Object pooling para optimización de balas</li>
+ *   <li><strong>EnemyManager:</strong> Spawning y gestión de oleadas</li>
+ *   <li><strong>CoreControl:</strong> Manejo de vida y estado del núcleo</li>
+ * </ul>
+ * 
+ * <h3>Eventos manejados:</h3>
+ * <ul>
+ *   <li><strong>CoreListener:</strong> Daño, destrucción y curación del núcleo</li>
+ *   <li><strong>EnemyManagerListener:</strong> Oleadas, muertes y llegada al núcleo</li>
+ * </ul>
+ * 
+ * @author Alberto Villalpando
+ * @version 1.0
+ * @see CoreControl.CoreListener
+ * @see EnemyManager.EnemyManagerListener
+ * @since 2024
  */
 public class GameState extends AbstractAppState implements CoreControl.CoreListener, EnemyManager.EnemyManagerListener {
     
+    // === Referencias de jMonkeyEngine ===
+    /** Aplicación principal de jME3 que proporciona acceso a recursos y sistemas */
     private SimpleApplication app;
+    
+    /** Nodo raíz de la escena 3D donde se adjuntan todos los objetos */
     private Node rootNode;
+    
+    /** Nodo específico del juego que contiene todas las entidades de gameplay */
     private Node gameNode;
+    
+    /** Gestor de entrada para manejar teclado, mouse y otros dispositivos */
     private InputManager inputManager;
+    
+    /** Cámara del juego configurada en vista top-down */
     private Camera cam;
     
-    // Configuración del juego
+    // === Configuración del juego ===
+    /** 
+     * Configuración del juego cargada desde JSON.
+     * Contiene parámetros de entidades, velocidades, tamaños y balanceo.
+     */
     private GameConfig config;
     
-    // Entidades principales
+    // === Entidades principales ===
+    /** 
+     * Entidad del jugador que puede moverse y disparar.
+     * Controlada por input WASD + mouse.
+     */
     private Player player;
+    
+    /** 
+     * Núcleo central que debe ser defendido de los enemigos.
+     * El objetivo principal del juego es mantenerlo con vida.
+     */
     private Core core;
+    
+    /** 
+     * Control que maneja la lógica del núcleo (vida, daño, destrucción).
+     * Implementa CoreListener para notificar eventos.
+     */
     private CoreControl coreControl;
     
-    // Managers
+    // === Sistemas de gestión ===
+    /** 
+     * Pool de objetos para balas que optimiza la creación/destrucción.
+     * Reutiliza instancias para mejorar rendimiento.
+     */
     private BulletPool bulletPool;
-    private EnemyManager enemyManager;
-    private Node bulletsNode; // Nodo para organizar las balas
     
-    // Estado del juego
+    /** 
+     * Gestor de enemigos que maneja spawning, oleadas y AI.
+     * Implementa EnemyManagerListener para eventos de enemigos.
+     */
+    private EnemyManager enemyManager;
+    
+    /** 
+     * Nodo específico para organizar todas las balas en la escena.
+     * Facilita la gestión y optimización del renderizado.
+     */
+    private Node bulletsNode;
+    
+    // === Estado del juego ===
+    /** 
+     * Indica si el juego ha terminado (núcleo destruido).
+     * Cuando es true, se detienen las actualizaciones principales.
+     */
     private boolean gameOver = false;
+    
+    /** 
+     * Tiempo total transcurrido desde el inicio del juego en segundos.
+     * Usado para estadísticas, oleadas y eventos temporales.
+     */
     private float gameTime = 0f;
     
-    // Variables para el manejo del input
+    // === Variables de control de entrada ===
+    /** Estados de las teclas de movimiento WASD */
     private boolean moveUp, moveDown, moveLeft, moveRight;
+    
+    /** 
+     * Vector de dirección de movimiento calculado desde las teclas WASD.
+     * Se normaliza automáticamente para movimiento diagonal consistente.
+     */
     private Vector3f moveDirection = new Vector3f();
     
     // Constantes para los nombres de los mappings
@@ -68,9 +162,13 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     private static final String SHOOT = "Shoot";
     
     /**
-     * Constructor del estado del juego
+     * Constructor del estado del juego.
      * 
-     * @param config Configuración del juego
+     * <p>Inicializa el GameState con la configuración proporcionada.
+     * La inicialización real de sistemas y entidades ocurre en initialize().</p>
+     * 
+     * @param config Configuración del juego cargada desde JSON con todos los parámetros
+     * @see #initialize(AppStateManager, Application)
      */
     public GameState(GameConfig config) {
         this.config = config;
@@ -107,7 +205,20 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     }
     
     /**
-     * Inicializa el pool de balas
+     * Inicializa el sistema de pool de balas para optimización de rendimiento.
+     * 
+     * <p>El BulletPool reutiliza instancias de balas para evitar la creación/destrucción
+     * constante de objetos, mejorando significativamente el rendimiento en combates intensos.</p>
+     * 
+     * <p>Configuración del pool:</p>
+     * <ul>
+     *   <li><strong>Tamaño máximo:</strong> Definido en configuración (típicamente 50)</li>
+     *   <li><strong>Velocidad:</strong> Velocidad uniforme de todas las balas</li>
+     *   <li><strong>Tiempo de vida:</strong> Duración antes de auto-destrucción</li>
+     *   <li><strong>Tamaño visual:</strong> Radio de las balas para colisiones</li>
+     * </ul>
+     * 
+     * @see BulletPool
      */
     private void initializeBulletPool() {
         System.out.println("Inicializando BulletPool...");
@@ -124,7 +235,24 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     }
     
     /**
-     * Inicializa el núcleo central
+     * Inicializa el núcleo central que debe ser defendido.
+     * 
+     * <p>El núcleo es el objetivo principal del juego. Los enemigos intentarán
+     * alcanzarlo para causar daño. Cuando su vida llega a cero, el juego termina.</p>
+     * 
+     * <p>Configuración del núcleo:</p>
+     * <ul>
+     *   <li><strong>Posición:</strong> Centro exacto del área de juego (0,0,0)</li>
+     *   <li><strong>Vida:</strong> Definida en configuración (típicamente 100)</li>
+     *   <li><strong>Tamaño:</strong> Radio visual y de colisión</li>
+     *   <li><strong>Control:</strong> CoreControl maneja lógica de vida y eventos</li>
+     * </ul>
+     * 
+     * <p>El CoreControl se configura como listener para recibir eventos de
+     * daño, curación y destrucción del núcleo.</p>
+     * 
+     * @see Core
+     * @see CoreControl
      */
     private void initializeCore() {
         // Crear el núcleo con la configuración
@@ -147,7 +275,25 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     }
     
     /**
-     * Inicializa el jugador
+     * Inicializa el jugador controlable por el usuario.
+     * 
+     * <p>El jugador es la entidad principal que el usuario controla para defender
+     * el núcleo. Tiene capacidad de movimiento libre y disparo direccional.</p>
+     * 
+     * <p>Configuración del jugador:</p>
+     * <ul>
+     *   <li><strong>Posición inicial:</strong> Offset del centro (5, 0, 5)</li>
+     *   <li><strong>Velocidad:</strong> Definida en configuración</li>
+     *   <li><strong>Tamaño:</strong> Radio para colisiones y visualización</li>
+     *   <li><strong>Límites:</strong> Área de juego de 15x15 unidades</li>
+     * </ul>
+     * 
+     * <p>El PlayerControl se crea automáticamente dentro de la entidad Player
+     * y se configura con los límites del área de juego para evitar que el
+     * jugador salga de los bordes.</p>
+     * 
+     * @see Player
+     * @see PlayerControl
      */
     private void initializePlayer() {
         // Crear el jugador con los parámetros correctos
@@ -181,7 +327,23 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     }
     
     /**
-     * Configura la cámara para vista top-down
+     * Configura la cámara para vista top-down óptima del área de juego.
+     * 
+     * <p>La cámara se posiciona directamente encima del área de juego para
+     * proporcionar una vista completa de la acción. Esta configuración es
+     * esencial para el gameplay twin-stick shooter.</p>
+     * 
+     * <p>Configuración de cámara:</p>
+     * <ul>
+     *   <li><strong>Posición:</strong> (0, 25, 0) - 25 unidades por encima</li>
+     *   <li><strong>Dirección:</strong> Mirando hacia abajo al centro (0,0,0)</li>
+     *   <li><strong>Up vector:</strong> Eje Z para orientación correcta</li>
+     *   <li><strong>Proyección:</strong> Perspectiva con FOV de 45°</li>
+     *   <li><strong>Frustum:</strong> Cerca: 1, Lejos: 1000 unidades</li>
+     * </ul>
+     * 
+     * <p>La proyección en perspectiva se mantiene en lugar de ortogonal
+     * para dar profundidad visual, aunque la jugabilidad es 2D.</p>
      */
     private void setupCamera() {
         // Posicionar cámara para vista top-down
@@ -199,7 +361,31 @@ public class GameState extends AbstractAppState implements CoreControl.CoreListe
     }
     
     /**
-     * Configura los controles del juego
+     * Configura el sistema completo de controles twin-stick.
+     * 
+     * <p>Implementa el esquema de control clásico de twin-stick shooters:</p>
+     * <ul>
+     *   <li><strong>Stick izquierdo (WASD):</strong> Movimiento direccional</li>
+     *   <li><strong>Stick derecho (Mouse):</strong> Apuntado y disparo</li>
+     * </ul>
+     * 
+     * <p>Mappings de entrada configurados:</p>
+     * <ul>
+     *   <li><strong>W/S:</strong> Movimiento vertical (adelante/atrás)</li>
+     *   <li><strong>A/D:</strong> Movimiento horizontal (izquierda/derecha)</li>
+     *   <li><strong>Mouse movement:</strong> Apuntado hacia cursor</li>
+     *   <li><strong>Left click:</strong> Disparo hacia dirección del cursor</li>
+     * </ul>
+     * 
+     * <p>Se configuran tres tipos de listeners:</p>
+     * <ul>
+     *   <li><strong>ActionListener:</strong> Para teclas de movimiento y disparo</li>
+     *   <li><strong>RawInputListener:</strong> Para movimiento preciso del mouse</li>
+     * </ul>
+     * 
+     * @see #moveListener
+     * @see #shootListener
+     * @see #mouseListener
      */
     private void setupInput() {
         // Configurar teclas de movimiento
